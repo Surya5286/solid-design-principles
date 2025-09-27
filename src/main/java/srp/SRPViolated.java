@@ -1,3 +1,5 @@
+package srp;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,7 +16,7 @@ class Product {
 
 // Violating SRP: ShoppingCart is handling multiple responsibilities
 class ShoppingCart {
-    private List<Product> products = new ArrayList<>();
+    private final List<Product> products = new ArrayList<>();
 
     public void addProduct(Product p) {
         products.add(p);
@@ -49,7 +51,7 @@ class ShoppingCart {
 }
 
 public class SRPViolated {
-    public static void main(String[] args) {
+    static void main(String[] args) {
         ShoppingCart cart = new ShoppingCart();
 
         cart.addProduct(new Product("Laptop", 50000));
