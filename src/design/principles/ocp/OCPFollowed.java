@@ -7,7 +7,8 @@ class SaveProductToSqlDB implements SaveProduct {
         this.cart = cart;
     }
 
-    public void saveToDb() {
+    @Override
+    public void save() {
         cart.getProducts().forEach(p ->
                 System.out.println("Product : " + p.name + " with price: " + p.price + " saved to SQL database."));
     }
@@ -20,7 +21,8 @@ class SaveProductToNoSqlDB implements SaveProduct {
         this.cart = cart;
     }
 
-    public void saveToDb() {
+    @Override
+    public void save() {
         cart.getProducts().forEach(p ->
                 System.out.println("Product : " + p.name + " with price: " + p.price + " saved to NoSQL database."));
     }
@@ -33,7 +35,8 @@ class SaveProductToFile implements SaveProduct {
         this.cart = cart;
     }
 
-    public void saveToFile() {
+    @Override
+    public void save() {
         cart.getProducts().forEach(p ->
                 System.out.println("Product : " + p.name + " with price: " + p.price + " saved to file."));
     }
@@ -54,17 +57,17 @@ public class OCPFollowed {
         System.out.println("\n--- Saving Products ---");
         // Save to SQL DB
         SaveProductToSqlDB saveToSql = new SaveProductToSqlDB(cart);
-        saveToSql.saveToDb();
+        saveToSql.save();
         System.out.println();
 
         // Save to NoSQL DB
         SaveProductToNoSqlDB saveToNoSql = new SaveProductToNoSqlDB(cart);
-        saveToNoSql.saveToDb();
+        saveToNoSql.save();
         System.out.println();
 
         // Save to File
         SaveProductToFile saveToFile = new SaveProductToFile(cart);
-        saveToFile.saveToFile();
+        saveToFile.save();
     }
 }
 
