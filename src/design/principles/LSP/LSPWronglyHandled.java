@@ -2,6 +2,28 @@ package design.principles.LSP;
 
 import java.util.List;
 
+class BanksClient {
+    private final List<Account> accounts;
+
+    public BanksClient(List<Account> accounts) {
+        this.accounts = accounts;
+    }
+
+    // Violation Of OCP as we have to check the type of account to avoid exception
+    public void performTransactions() {
+        accounts.forEach(account -> {
+            System.out.println("\nUsing account: " + account.getClass().getSimpleName());
+            if (account instanceof FixedDepositAccount) {
+                account.deposit(500);
+                System.out.println("Skipping withdraw operation for FixedDepositAccount.");
+            } else {
+                account.deposit(500);
+                account.withdraw(200);
+            }
+        });
+    }
+}
+
 public class LSPWronglyHandled {
     public static void main(String[] args) {
 
@@ -14,18 +36,8 @@ public class LSPWronglyHandled {
                 new FixedDepositAccount(3000)
         );
 
-
-        // Violation Of OCP as we have to check the type of account to avoid exception
-        accounts.forEach(account -> {
-            System.out.println("\nUsing account: " + account.getClass().getSimpleName());
-            if (account instanceof FixedDepositAccount) {
-                account.deposit(500);
-                System.out.println("Skipping withdraw operation for FixedDepositAccount.");
-            } else {
-                account.deposit(500);
-                account.withdraw(200);
-            }
-        });
+        BanksClient client = new BanksClient(accounts);
+        client.performTransactions();
     }
 }
 

@@ -1,11 +1,9 @@
 package design.principles.LSP;
 
-
-import java.util.ArrayList;
 import java.util.List;
 
 interface Account {
-    void deposit(double amount) ;
+    void deposit(double amount);
     void withdraw(double amount);
 }
 
@@ -86,15 +84,14 @@ class FixedDepositAccount implements Account {
     }
 }
 
-public class LSPViolated {
-    public static void main(String[] args) {
+class BankClient {
+    private final List<Account> accounts;
 
-        List<Account> accounts = new ArrayList<>();
-        accounts.add(new SavingsAccount(1000));
-        accounts.add(new CurrentAccount(2000));
-        accounts.add(new FixedDepositAccount(5000));
+    public BankClient(List<Account> accounts) {
+        this.accounts = accounts;
+    }
 
-        // Using the accounts
+    public void performTransactions() {
         accounts.forEach(account -> {
             System.out.println("\nUsing account: " + account.getClass().getSimpleName());
             account.deposit(500);
@@ -104,5 +101,20 @@ public class LSPViolated {
                 System.out.println("Exception : " + e.getMessage());
             }
         });
+    }
+}
+
+public class LSPViolated {
+    public static void main(String[] args) {
+
+        List<Account> accounts = List.of(
+                new SavingsAccount(1000),
+                new CurrentAccount(2000),
+                new FixedDepositAccount(3000)
+        );
+
+        // Call to Bank Client to invoke transactions
+        BankClient client = new BankClient(accounts);
+        client.performTransactions();
     }
 }

@@ -84,24 +84,44 @@ class FDAccount implements DepositOnlyAccount {
     }
 }
 
+class Client {
+    private final List<DepositOnlyAccount> fdAccounts;
+    private final List<WithDrawableAccount> drawableAccounts;
+
+    public Client(List<DepositOnlyAccount> fdAccounts, List<WithDrawableAccount> drawableAccounts) {
+        this.fdAccounts = fdAccounts;
+        this.drawableAccounts = drawableAccounts;
+    }
+
+    public void performFDTransactions() {
+        fdAccounts.forEach(account -> account.deposit(500));
+    }
+
+    public void performDrawableTransactions() {
+        drawableAccounts.forEach(account -> {
+            account.deposit(500);
+            account.withdraw(200);
+        });
+    }
+}
+
 public class LSPFollowed {
     public static void main(String[] args) {
 
-        List<DepositOnlyAccount> fdAccounts = List.of(new FDAccount(1000));
-
+        List<DepositOnlyAccount> fdAccounts = List.of(
+                new FDAccount(1000)
+        );
         List<WithDrawableAccount> drawableAccounts = List.of(
                 new SavingAccount(1000),
                 new SalaryAccount(2000)
         );
 
-        System.out.println("\n---- WithDrawable Accounts Operations ----");
-        drawableAccounts.forEach(account -> {
-            account.deposit(500);
-            account.withdraw(200);
-        });
-
         // No Violation Of LSP as we don't have to check the type of account to avoid exception
+        System.out.println("\n---- WithDrawable Accounts Operations ----");
+        Client client = new Client(fdAccounts, drawableAccounts);
+        client.performDrawableTransactions();
+
         System.out.println("\n---- FD Accounts Operations ----");
-        fdAccounts.forEach(account -> account.deposit(500));
+        client.performFDTransactions();
     }
 }
