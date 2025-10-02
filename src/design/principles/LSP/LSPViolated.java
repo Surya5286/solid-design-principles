@@ -65,9 +65,6 @@ class CurrentAccount implements Account {
 
 class FixedDepositAccount implements Account {
 
-    public FixedDepositAccount(double amount) {
-    }
-
     @Override
     public void deposit(double amount) {
         if (amount > 0) {
@@ -84,33 +81,13 @@ class FixedDepositAccount implements Account {
     }
 }
 
-class BankClient {
-    private final List<Account> accounts;
-
-    public BankClient(List<Account> accounts) {
-        this.accounts = accounts;
-    }
-
-    public void performTransactions() {
-        accounts.forEach(account -> {
-            System.out.println("\nUsing account: " + account.getClass().getSimpleName());
-            account.deposit(500);
-            try {
-                account.withdraw(200);
-            } catch (UnsupportedOperationException e) {
-                System.out.println("Exception : " + e.getMessage());
-            }
-        });
-    }
-}
-
 public class LSPViolated {
     public static void main(String[] args) {
 
         List<Account> accounts = List.of(
                 new SavingsAccount(1000),
                 new CurrentAccount(2000),
-                new FixedDepositAccount(3000)
+                new FixedDepositAccount()
         );
 
         // Call to Bank Client to invoke transactions
