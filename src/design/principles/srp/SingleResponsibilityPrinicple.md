@@ -1,5 +1,3 @@
-# SingleResponsibilityPrinicple.md
-
 # Single Responsibility Principle (SRP)
 
 ## 1) Executive Summary
@@ -43,7 +41,8 @@
 **File**: `SRPViolated.java`
 
 ```java
-// ❌ ShoppingCart mixes responsibilities (business logic + presentation + persistence)
+
+// ❌ Violated SRP & reason - mixes business (totals), presentation (printing), and persistence (DB) in one class
 class ShoppingCart {
     private final List<Product> products = new ArrayList<>();
 
@@ -51,31 +50,40 @@ class ShoppingCart {
         products.add(p);
     }
 
+    public List<Product> getProducts() {
+        return products;
+    }
+
     // ✅ Business logic (OK to live here)
     public double calculateTotal() {
-        double total = 0.0;
-        for (Product p : products) total += p.price();
+        double total = 0;
+        for (Product p : products) {
+            total += p.price();
+        }
         return total;
     }
 
-    // ❌ Presentation responsibility mixed into cart
+    // ❌ Violated SRP & reason - presentation/formatting belongs in a separate responsibility
     public void printInvoice() {
-        System.out.println("----- Invoice -----");
-        for (Product p : products) System.out.println(p.name() + " : " + p.price());
-        System.out.println("Total: " + calculateTotal());
+        System.out.println("Shopping Cart Invoice:");
+        for (Product p : products) {
+            System.out.println(p.name() + " - Rs " + p.price());
+        }
+        System.out.println("Total: Rs " + calculateTotal());
     }
 
-    // ❌ Persistence responsibility mixed into cart
+    // ❌ Violating SRP - persistence/DB operations belong outside business class
     public void saveToDatabase() {
-        // Imagine JDBC/ORM code here
-        System.out.println("Saving cart with " + products.size() + " items to DB");
+        getProducts().forEach(p ->
+                System.out.println("Product : " + p.name() + " with price: " + p.price() + " saved to database."));
     }
 }
+
 ```
 
 #### Why it violates SRP
-- **`ShoppingCart.printInvoice()`** introduces **presentation/formatting** concerns into a business class.
-- **`ShoppingCart.saveToDatabase()`** introduces **persistence/infrastructure** concerns into the same business class.
+- **`printInvoice()`** introduces **presentation/formatting** concerns into a business class. *(Violated SRP & reason noted inline above)*
+- **`saveToDatabase()` / `saveToDb()`** introduces **persistence/infrastructure** concerns into the same business class. *(Violated SRP & reason noted inline above)*
 - The cart now has **three distinct reasons to change**: pricing rules (business), invoice layout (presentation), and database changes (infrastructure).
 
 #### Respective Class Diagram (Before)
@@ -89,9 +97,9 @@ classDiagram
     class ShoppingCart {
       -List~Product~ products
       +addProduct(Product)
-      +calculateTotal() double      %% business
-      +printInvoice() void          %% presentation ❌
-      +saveToDatabase() void        %% persistence  ❌
+      +calculateTotal() double      %% ✅ implemented SRP & reason - cohesive pricing inside business
+      +printInvoice() void          %% ❌ Violated SRP & reason - presentation mixed into business
+      +saveToDatabase() void        %% ❌ Violated SRP & reason - persistence mixed into business
     }
 
     class SRPViolated {
@@ -105,10 +113,10 @@ classDiagram
 ---
 
 ## 6) Refactoring Objectives
-- Keep **business responsibility** (cart state + totals) in `ShoppingCart`’s domain successor (`ShopCart`).
+- Keep **business responsibility** (cart state + totals) in a focused class (`ShopCart`).
 - Extract **presentation** into a dedicated class (`ShoppingCartPrinter`) that depends on the cart but does not alter it.
 - Extract **persistence** into a dedicated class (`SaveProduct`) that depends on the cart but isolates storage concerns.
-- Make responsibilities independently evolvable and testable.
+- Make responsibilities independently evolvable and testable; each class has **one reason to change**.
 
 ---
 
@@ -119,7 +127,7 @@ classDiagram
 **File**: `SRPFollowed.java`
 
 ```java
-// ✅ Single responsibility: cart state + pricing
+// ✅ implemented SRP & reason - owns only cart state and pricing rules
 class ShopCart {
     private final List<Product> products = new ArrayList<>();
 
@@ -131,45 +139,37 @@ class ShopCart {
         return products;
     }
 
+    // ✅ implemented Single responsibility: cohesive pricing logic
     public double calculateTotal() {
-        double total = 0.0;
-        for (Product p : products) total += p.price();
+        double total = 0;
+        for (Product p : products)
+            total += p.price();
+
         return total;
     }
 }
 
-// ✅ Single responsibility: presentation/formatting
-class ShoppingCartPrinter {
-    private final ShopCart cart;
-
-    public ShoppingCartPrinter(ShopCart cart) {
-        this.cart = cart;
-    }
-
+// ✅ implemented SRP & reason - formatting isolated from business logic
+record ShoppingCartPrinter(ShopCart cart) {
     public void printInvoice() {
-        System.out.println("----- Invoice -----");
-        for (Product p : cart.getProducts()) System.out.println(p.name() + " : " + p.price());
-        System.out.println("Total: " + cart.calculateTotal());
+        System.out.println("Shopping Cart Invoice:");
+        List<Product> products = cart.getProducts();
+        for (Product p : products)
+            System.out.println(p.name() + " - Rs " + p.price());
     }
 }
 
-// ✅ Single responsibility: persistence
-class SaveProduct {
-    private final ShopCart cart;
-
-    public SaveProduct(ShopCart cart) {
-        this.cart = cart;
-    }
-
+// ✅ implemented SRP & reason - DB interaction isolated from business logic
+record SaveProduct(ShopCart cart) {
     public void saveToDb() {
-        // Imagine JDBC/ORM code here
-        System.out.println("Saving cart with " + cart.getProducts().size() + " items to DB");
+        cart.getProducts().forEach(p -> System.out.println("Product : " + p.name() + " with price: " + p.price() + " saved to database."));
     }
 }
+
 ```
 
 #### How the rewrite fixes it
-- **Presentation** (`ShoppingCartPrinter.printInvoice`) and **persistence** (`SaveProduct.saveToDb`) are separated from the **business** responsibility (`ShopCart.calculateTotal`).
+- **Presentation** (`ShoppingCartPrinter.printInvoice`) and **persistence** (`SaveProduct.saveToDb` or `saveToDatabase`) are separated from the **business** responsibility (`ShopCart.calculateTotal`). *(implemented SRP & reasons noted inline above)*
 - Each class has **one reason to change**:
   - `ShopCart`: cart rules and pricing changes.
   - `ShoppingCartPrinter`: invoice/formatting changes.
@@ -187,17 +187,17 @@ classDiagram
       -List~Product~ products
       +addProduct(Product)
       +getProducts() List~Product~
-      +calculateTotal() double
+      +calculateTotal() double       %% ✅ implemented SRP & reason - cohesive pricing only
     }
 
     class ShoppingCartPrinter {
       -ShopCart cart
-      +printInvoice() void
+      +printInvoice() void           %% ✅ implemented SRP & reason - presentation isolated
     }
 
     class SaveProduct {
       -ShopCart cart
-      +saveToDb() void
+      +saveToDb() void               %% ✅ implemented SRP & reason - persistence isolated
     }
 
     class SRPFollowed {
@@ -219,7 +219,7 @@ classDiagram
 - **Dependency Direction**: Business rules (`ShopCart`) do not depend on I/O or DB; presentation and persistence depend on the cart (not vice versa).
 - **Open/Closed Principle (OCP) synergy**: Add new output channels (PDF/email) or repositories (JDBC/JPA/NoSQL) via new classes—**no modification** to `ShopCart`.
 - **Testability**: 
-  - `ShopCart` tests are pure and side-effect free.
+  - `ShopCart` tests are pure and side effect free.
   - `ShoppingCartPrinter` can be tested by capturing output or injecting a `Writer`.
   - `SaveProduct` can be tested with a mock/fake repository.
 
@@ -227,7 +227,7 @@ classDiagram
 
 ## 9) Trade-offs & Alternatives
 - **Trade-off**: More classes and indirection vs. clarity and safe evolution.
-- **KISS/YAGNI**: Don’t prematurely extract responsibilities you **don’t have**; split when a second concern appears or when tests become painful.
+- **`KISS`/`YAGNI`**: Don’t prematurely extract responsibilities you **don’t have**; split when a second concern appears or when tests become painful.
 - **Alternative**: A thin façade (e.g., `ShoppingCartService`) may coordinate `ShopCart`, `ShoppingCartPrinter`, and `SaveProduct` if a simple entry point is desired, while preserving SRP inside.
 
 ---

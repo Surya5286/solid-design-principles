@@ -4,14 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 // Product class representing any item of any ECommerce.
-class Product {
-    public String name;
-    public double price;
-
-    public Product(String name, double price) {
-        this.name = name;
-        this.price = price;
-    }
+record Product(String name, double price) {
 }
 
 // Violating SRP: ShoppingCart is handling multiple responsibilities
@@ -30,7 +23,7 @@ class ShoppingCart {
     public double calculateTotal() {
         double total = 0;
         for (Product p : products) {
-            total += p.price;
+            total += p.price();
         }
         return total;
     }
@@ -39,7 +32,7 @@ class ShoppingCart {
     public void printInvoice() {
         System.out.println("Shopping Cart Invoice:");
         for (Product p : products) {
-            System.out.println(p.name + " - Rs " + p.price);
+            System.out.println(p.name() + " - Rs " + p.price());
         }
         System.out.println("Total: Rs " + calculateTotal());
     }
@@ -47,7 +40,7 @@ class ShoppingCart {
     // 3. Violating SRP - Saves to DB (Should be in a separate class)
     public void saveToDatabase() {
         getProducts().forEach(p ->
-                System.out.println("Product : " + p.name + " with price: " + p.price + " saved to database."));
+                System.out.println("Product : " + p.name() + " with price: " + p.price() + " saved to database."));
     }
 }
 
