@@ -1,12 +1,11 @@
 package design.principles.ocp;
 
-class SaveProductToSqlDB implements SaveProduct {
-    private final ShoppingCart cart;
+interface SaveProduct {
+    void save();
+}
 
-    public SaveProductToSqlDB(ShoppingCart cart) {
-        this.cart = cart;
-    }
-
+// Follows OCP as we can add new storage classes without modifying existing ones.
+record SaveProductToSqlDB(ShoppingCart cart) implements SaveProduct {
     @Override
     public void save() {
         cart.getProducts().forEach(p ->
@@ -14,13 +13,8 @@ class SaveProductToSqlDB implements SaveProduct {
     }
 }
 
-class SaveProductToNoSqlDB implements SaveProduct {
-    private final ShoppingCart cart;
-
-    public SaveProductToNoSqlDB(ShoppingCart cart) {
-        this.cart = cart;
-    }
-
+// Follows OCP as we can add new storage classes without modifying existing ones.
+record SaveProductToNoSqlDB(ShoppingCart cart) implements SaveProduct {
     @Override
     public void save() {
         cart.getProducts().forEach(p ->
@@ -28,13 +22,8 @@ class SaveProductToNoSqlDB implements SaveProduct {
     }
 }
 
-class SaveProductToFile implements SaveProduct {
-    private final ShoppingCart cart;
-
-    public SaveProductToFile(ShoppingCart cart) {
-        this.cart = cart;
-    }
-
+// Follows OCP as we can add new storage classes without modifying existing ones.
+record SaveProductToFile(ShoppingCart cart) implements SaveProduct {
     @Override
     public void save() {
         cart.getProducts().forEach(p ->
@@ -70,4 +59,3 @@ public class OCPFollowed {
         saveToFile.save();
     }
 }
-
