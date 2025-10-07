@@ -35,13 +35,7 @@ class ShoppingCart {
     }
 }
 
-class ShoppingCartPrinter {
-    private final ShoppingCart cart;
-
-    public ShoppingCartPrinter(ShoppingCart cart) {
-        this.cart = cart;
-    }
-
+record ShoppingCartPrinter(ShoppingCart cart) {
     public void printInvoice() {
         System.out.println("Shopping Cart Invoice:");
         List<Product> products = cart.getProducts();
@@ -50,28 +44,19 @@ class ShoppingCartPrinter {
     }
 }
 
-class SaveProductToDB {
-    private final ShoppingCart cart;
-
-    public SaveProductToDB(ShoppingCart cart) {
-        this.cart = cart;
-    }
-
-    // 1. Save to SQL DB - Violating OCP
+record SaveProductToDB(ShoppingCart cart) {
     public void saveToSql() {
         cart.getProducts().forEach(p ->
                 System.out.println("Product : " + p.name + " with price: " + p.price + " saved to SQL DB."));
         System.out.println();
     }
 
-    // 2. Save to Mongo DB - Violating OCP
     public void saveToMongo() {
         cart.getProducts().forEach(p ->
                 System.out.println("Product : " + p.name + " with price: " + p.price + " saved to MongoDB."));
         System.out.println();
     }
 
-    // 3. Save to File - Violating OCP
     public void saveToFile() {
         cart.getProducts().forEach(p ->
                 System.out.println("Product : " + p.name + " with price: " + p.price + " saved to File Path."));
