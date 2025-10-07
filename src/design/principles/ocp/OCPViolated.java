@@ -44,19 +44,25 @@ record ShoppingCartPrinter(ShoppingCart cart) {
     }
 }
 
+// Violates OCP as every time we want to add a new storage, we have to modify this class.
+// This class has multiple reasons to change.
 record SaveProductToDB(ShoppingCart cart) {
+
+    // saveToSql method violates OCP
     public void saveToSql() {
         cart.getProducts().forEach(p ->
                 System.out.println("Product : " + p.name + " with price: " + p.price + " saved to SQL DB."));
         System.out.println();
     }
 
+    // saveToMongo method violates OCP
     public void saveToMongo() {
         cart.getProducts().forEach(p ->
                 System.out.println("Product : " + p.name + " with price: " + p.price + " saved to MongoDB."));
         System.out.println();
     }
 
+    // saveToFile method violates OCP
     public void saveToFile() {
         cart.getProducts().forEach(p ->
                 System.out.println("Product : " + p.name + " with price: " + p.price + " saved to File Path."));
